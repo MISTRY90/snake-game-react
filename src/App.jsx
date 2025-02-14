@@ -1,8 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Snake } from "react-snake-lib";
 import "./App.css";
 
 const App = () => {
+  // Create audio references for WAV files (ensure these files exist in public/sounds/)
+const eatAudioRef = useRef(new Audio("./mixkit-chewing-something-crunchy-2244.wav"));
+  const gameOverAudioRef = useRef(new Audio("./mixkit-sad-game-over-trombone-471.wav"));
+  const successAudioRef = useRef(new Audio("./mixkit-male-voice-cheer-victory-2011.wav"));
+
+
   const [score, setScore] = useState(0);
   const [timeLeft, setTimeLeft] = useState(30);
   const [gameStarted, setGameStarted] = useState(false);
@@ -50,15 +56,23 @@ const App = () => {
   const onGameOver = () => {
     setGameOver(true);
     setGameStarted(false);
+    // Play game over sound
+    gameOverAudioRef.current.play();
   };
 
   // Update score and trigger the success alert if score reaches 5.
   const onScoreChange = (newScore) => {
     setScore(newScore);
+    // Play the eating sound for every food eaten until the player wins.
+    if (newScore < 5) {
+      eatAudioRef.current.play();
+    }
     if (newScore >= 5 && !showSuccessAlert) {
       setShowSuccessAlert(true);
       setGameOver(true);
       setGameStarted(false);
+      // Play success sound
+      successAudioRef.current.play();
     }
   };
 
