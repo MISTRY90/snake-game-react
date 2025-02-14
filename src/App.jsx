@@ -37,7 +37,7 @@ const eatAudioRef = useRef(new Audio("./mixkit-chewing-something-crunchy-2244.wa
 
   // Watch for timeout condition (time has run out and score is less than 5).
   useEffect(() => {
-    if (timeLeft === 0 && score < 5) {
+    if (timeLeft === 0 && score < 10) {
       setShowTimeoutAlert(true);
     }
   }, [timeLeft, score]);
