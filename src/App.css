@@ -1,90 +1,55 @@
-/* Main container styling */
-*{
-  padding: 0;
+/* styles.css */
+
+body {
   margin: 0;
+  padding: 0;
+  background-color: #ececec;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
-/* Main container styling */
-.app-container {
+
+.app {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  height: 100vh;
-  background-color: #ff4d4d;
-  color: white;
-  font-family: Arial, sans-serif;
-  position: relative;
+  padding: 20px;
 }
 
-/* Status text styling */
-.status {
-  font-size: 18px;
-  margin: 10px 0;
+.game-board {
+  position: relative; /* Ensures absolute children (snake segments, food) are positioned correctly */
+  margin: 20px auto;
+  border: 2px solid #333;
+  background-color: #fff;
 }
 
-/* Instruction message */
-.instructions {
-  font-size: 16px;
-  margin-bottom: 20px;
-}
-
-/* Custom Alert Overlay */
-.custom-alert-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-}
-
-/* Custom Alert Box */
-.custom-alert {
-  background: #fff;
+.score {
+  margin-top: 10px;
+  font-size: 1.5rem;
   color: #333;
-  padding: 30px 40px;
-  border-radius: 10px;
-  text-align: center;
-  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.3);
 }
 
-.custom-alert h2 {
-  margin: 0 0 20px 0;
+.controls {
+  margin-top: 10px;
 }
 
-.custom-alert p {
-  font-size: 16px;
-  margin-bottom: 20px;
-}
-
-/* Button group styling for multiple buttons */
-.button-group {
-  display: flex;
-  justify-content: center;
-  gap: 20px;
-}
-
-.custom-alert button {
-  padding: 10px 20px;
+.controls button {
+  padding: 8px 16px;
+  margin-right: 10px;
+  background-color: #007bff;
   border: none;
-  background: #ff4d4d;
+  border-radius: 4px;
   color: #fff;
-  border-radius: 5px;
+  font-size: 1rem;
   cursor: pointer;
-  font-size: 16px;
-  transition: background 0.3s ease;
+  transition: background-color 0.3s ease;
 }
 
-.custom-alert button:hover {
-  background: #ff1a1a;
+.controls button:hover {
+  background-color: #0056b3;
 }
 
-/* Game Over message styling */
-.game-over {
-  margin-top: 20px;
-  font-size: 24px;
+.controls select {
+  padding: 8px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
 }

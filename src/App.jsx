@@ -1,170 +1,78 @@
-import React, { useState, useEffect, useRef } from "react";
-import { Snake } from "react-snake-lib";
+// App.js
+import { useEffect, useRef, useState } from "react";
+import { Snake } from "snake-game-engine";
+import { gameConfig } from "./gameconfig";
+import { renderConfig, CELL_SIZE } from "./renderer/customRenderer";
 import "./App.css";
 
-const App = () => {
-  // Create audio references for WAV files (ensure these files exist in public/sounds/)
-const eatAudioRef = useRef(new Audio("./mixkit-chewing-something-crunchy-2244.wav"));
-  const gameOverAudioRef = useRef(new Audio("./mixkit-sad-game-over-trombone-471.wav"));
-  const successAudioRef = useRef(new Audio("./mixkit-male-voice-cheer-victory-2011.wav"));
+function App() {
+  const [isGameRunning, setIsGameRunning] = useState(false);
+  const gameRef = useRef(null);
+  const boardRef = useRef(null);
+  const scoreRef = useRef(null); // if you want to display score
 
+  const handleGameOver = () => {
+    alert("Game Over!");
+    setIsGameRunning(false);
+    gameRef.current && gameRef.current.stop();
+  };
 
-  const [score, setScore] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(30);
-  const [gameStarted, setGameStarted] = useState(false);
-  const [gameOver, setGameOver] = useState(false);
-  const [showSuccessAlert, setShowSuccessAlert] = useState(false);
-  const [showTimeoutAlert, setShowTimeoutAlert] = useState(false);
+  const startGame = () => {
+    // Ensure previous game is stopped and clear the board
+    gameRef.current && gameRef.current.stop();
+    if (boardRef.current) {
+      renderConfig.clearRenderer(boardRef.current);
+      // Create new game instance
+      gameRef.current = new Snake(gameConfig, renderConfig, handleGameOver);
+      gameRef.current.start();
+      setIsGameRunning(true);
+    }
+  };
 
-  // Timer effect: Decreases timeLeft every second when the game is active.
+  // Setup keyboard event listener for direction changes
   useEffect(() => {
-    let timer;
-    if (gameStarted && !gameOver && timeLeft > 0) {
-      timer = setInterval(() => {
-        setTimeLeft((prevTime) => {
-          if (prevTime <= 1) {
-            // Time is up: Stop the game.
-            setGameOver(true);
-            setGameStarted(false);
-            return 0;
-          }
-          return prevTime - 1;
-        });
-      }, 1000);
-    }
-    return () => clearInterval(timer);
-  }, [gameStarted, gameOver, timeLeft]);
+    const handleKeydown = (event) => {
+      if (!gameRef.current) return;
+      const directions = {
+        ArrowUp: { x: 0, y: -1 },
+        ArrowDown: { x: 0, y: 1 },
+        ArrowLeft: { x: -1, y: 0 },
+        ArrowRight: { x: 1, y: 0 },
+      };
+      const newDirection = directions[event.key];
+      if (newDirection) {
+        gameRef.current.setDirection(newDirection);
+      }
+    };
 
-  // Watch for timeout condition (time has run out and score is less than 5).
-  useEffect(() => {
-    if (timeLeft === 0 && score < 10) {
-      setShowTimeoutAlert(true);
-    }
-  }, [timeLeft, score]);
-
-  // Resets game state and starts a new game.
-  const onGameStart = () => {
-    setGameStarted(true);
-    setGameOver(false);
-    setTimeLeft(30);
-    setScore(0);
-    setShowSuccessAlert(false);
-    setShowTimeoutAlert(false);
-  };
-
-  // Called when the snake hits a wall.
-  const onGameOver = () => {
-    setGameOver(true);
-    setGameStarted(false);
-    // Play game over sound
-    gameOverAudioRef.current.play();
-  };
-
-  // Update score and trigger the success alert if score reaches 5.
-  const onScoreChange = (newScore) => {
-    setScore(newScore);
-    // Play the eating sound for every food eaten until the player wins.
-    if (newScore < 5) {
-      eatAudioRef.current.play();
-    }
-    if (newScore >= 5 && !showSuccessAlert) {
-      setShowSuccessAlert(true);
-      setGameOver(true);
-      setGameStarted(false);
-      // Play success sound
-      successAudioRef.current.play();
-    }
-  };
-
-  // Refreshes the page.
-  const refreshPage = () => {
-    window.location.reload();
-  };
-
-  // Navigates to the next level using the provided URL.
-  const navigateToNextLevel = () => {
-    window.location.href = "https://valentine-game-eta.vercel.app/";
-  };
+    document.addEventListener("keydown", handleKeydown);
+    return () => document.removeEventListener("keydown", handleKeydown);
+  }, []);
 
   return (
-    <div className="app-container">
-      <h1>Snake Game</h1>
-      <p className="status">
-        Time Left: {timeLeft}s | Score: {score}
-      </p>
-      <p className="instructions">Score 5 in 30 seconds and win</p>
-
-      <Snake
-        onScoreChange={onScoreChange}
-        onGameOver={onGameOver}
-        onGameStart={onGameStart}
-        width="1000px"
-        height="700px"
-        bgColor="silver"
-        innerBorderColor="#b1b0b0"
-        snakeSpeed={110}
-        borderColor="black"
-        snakeColor="#3e3e3e"
-        snakeHeadColor="#1a1a1a"
-        appleColor="tomato"
-        borderRadius={5}
-        snakeHeadRadius={1}
-        borderWidth={0}
-        shakeBoard={true}
-        boxShadow="rgba(100, 100, 111, 0.2) 0px 7px 29px 0px"
-        size={16}
-        startGameText="Start Game"
-        startButtonStyle={{
-          color: "white",
-          padding: "6px 20px",
-          backgroundColor: "#1a1a1a",
-          borderRadius: "10px",
-          fontSize: "17px",
-          fontWeight: "600",
-          cursor: "pointer",
+    <div className="app">
+      <div
+        ref={boardRef}
+        className="game-board"
+        style={{
+          width: gameConfig.width * CELL_SIZE,
+          height: gameConfig.height * CELL_SIZE,
+          position: "relative", // Allows absolute positioning inside
+          backgroundColor: "#f0f0f0", // Light gray background for debugging
+          border: "2px solid #ccc",
         }}
-        startButtonHoverStyle={{
-          backgroundColor: "#4f4d4d",
-        }}
-        noWall={true}
-      />
-
-      {/* Custom Success Alert */}
-      {showSuccessAlert && (
-        <div className="custom-alert-overlay">
-          <div className="custom-alert">
-            <h2>🎉 Successful! 🎉</h2>
-            <button type="button" onClick={navigateToNextLevel}>
-              Next Level
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Custom Timeout Alert */}
-      {showTimeoutAlert && (
-        <div className="custom-alert-overlay">
-          <div className="custom-alert">
-            <h2>Time's Up!</h2>
-            <p>You did not score 5 in 30 seconds.</p>
-            <div className="button-group">
-              <button type="button" onClick={refreshPage}>
-                Start Game
-              </button>
-              <button type="button" onClick={navigateToNextLevel}>
-                Skip Level
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Fallback Game Over Message for other scenarios */}
-      {gameOver && !showSuccessAlert && !showTimeoutAlert && (
-        <h2 className="game-over">Game Over! 🐍</h2>
-      )}
+      > </div>
+      <div className="score">
+        Score: <span ref={scoreRef}>0</span>  
+      </div>
+      <div className="controls">
+        <button onClick={startGame}>
+          {isGameRunning ? "Restart Game" : "Start Game"}
+        </button>
+        {/* Optional: add a difficulty selector if needed */}
+      </div>
     </div>
   );
-};
+}
 
 export default App;
